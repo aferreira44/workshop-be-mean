@@ -14,25 +14,25 @@ const options = {
     }
 };
 
-function callback(res) {
-    console.log('STATUS: ' + res.statusCode);
-    console.log('HEADERS ' + JSON.stringify(res.headers));
-    let data = '';
-
-    res.setEncoding('utf8');
-    res.on('data', chunk => data += chunk);
-
-    console.log('data:' + data);
-
-    res.on('end', () => { return data });
-};
-
 http.createServer(function (req, res) {
-    req = https.request(options, callback);
-    res.write('Endereço: ' + address);
-    res.write('Total de BTC: ' + res.data);
-    req.on('error', error => console.log('Erro: ' + error.message));
-    req.end();
-}).listen(3000, function () {
-    console.log('Servidor rodando em http://localhost:3000');
-});;
+
+    const clientRequest = https.request(options, clientResponse => {
+        console.log('STATUS: ' + res.statusCode);
+
+        clientResponse.on('data', data => {
+            res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
+            res.write('<h3>Endereço: ' + address);
+            res.write('<h3>Total em BTC: ' + data / 100000000 + '</h3>');
+            res.end();
+        });
+    });
+
+    clientRequest.end();
+
+    clientRequest.on('error', error => {
+        console.log('Error: ' + error.message);
+    });
+})
+    .listen(3000, function () {
+        console.log('Servidor rodando em http://localhost:3000');
+    });;
