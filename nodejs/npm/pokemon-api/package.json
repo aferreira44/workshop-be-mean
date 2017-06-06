@@ -1,0 +1,27 @@
+{
+  "name": "pokemon-api",
+  "version": "0.0.1",
+  "description": "API para nossos Pokemons",
+  "main": "index.js",
+  "scripts": {
+    "start": "node script js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "roda": "node script js"
+  },
+  "keywords": [
+    "pokemon",
+    "node",
+    "mongodb"
+  ],
+  "author": "André Ferreira",
+  "license": "WTFPL",
+  "dependencies": {
+    "mongoose": "^4.10.4"
+  },
+  "devDependencies": {
+    "jasmine": "^2.6.0"
+  },
+  "optionalDependencies": {
+    "colors": "^1.1.2"
+  }
+}
