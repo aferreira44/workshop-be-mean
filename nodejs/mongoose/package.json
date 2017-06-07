@@ -1,0 +1,21 @@
+{
+  "name": "mongoose-pockemon",
+  "version": "0.0.1",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "nodemon": "nodemon app.js"
+  },
+  "keywords": [
+    "mongoose",
+    "mongodb",
+    "nodejs"
+  ],
+  "author": "Andre Ferreira",
+  "license": "WTFPL",
+  "dependencies": {
+    "mongoose": "^4.10.4"
+  }
+}
