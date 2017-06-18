@@ -41,6 +41,111 @@ db
     .count()
 
 db
+    .restaurantes
+    .count() // retorna número de documentos (é mais rápido que usar find().length())
+
+db
+    .restaurantes
+    .count({"borough": "Bronx"})
+
+db
+    .restaurantes
+    .distinct('borough') // retorna valores distintos de um determinado campo entre todos os documentos da collection
+
+db
+    .restaurantes
+    .distinct('borough')
+    .length // exibe quantidade de valores distintos dentro do array
+
+db
+    .restaurantes
+    .distinct('cuisine')
+    .sort() // coloca em ordem alfabética os valores distintos
+
+db
+    .restaurantes
+    .distinct('cuisine')
+    .sort()
+    .reverse() // coloca em ordem alfabética decrescente
+
+db
+    .restaurantes
+    .find({}, {
+        name: 1,
+        _id: 0
+    })
+    .limit(2) //
+
+// skip() - funciona como paginação, pulando (n) resultados de acordo com o limit()
+
+db
+    .restaurantes
+    .find({}, {
+        name: 1,
+        _id: 0
+    })
+    .limit(2)
+    .skip(0)
+
+db
+    .restaurantes
+    .find({}, {
+        name: 1,
+        _id: 0
+    })
+    .limit(2)
+    .skip(1)
+
+// group() -
+// https://docs.mongodb.com/manual/reference/method/db.collection.group/
+
+db
+    .restaurantes
+    .group({
+        initial: {
+            total: 0
+        },
+        reduce: function (curr, result) {
+            curr
+                .types
+                .forEach(function (type) {
+                    if (result[type]) {
+                        result[type]++
+                    } else {
+                        result[type] = 1
+                    }
+                    result.total++
+                });
+        }
+    });
+
+// aggregate() -
+// https://docs.mongodb.com/v3.2/reference/method/db.collection.aggregate/
+
+db
+    .pokemons
+    .aggregate({
+        $group: {
+            _id: {},
+            defense_avg: {
+                $avg: '$defense'
+            },
+            attack_avg: {
+                $avg: '$attack'
+            },
+            defense: {
+                $sum: '$defense'
+            },
+            attack: {
+                $sum: '$attack'
+            },
+            total: {
+                $sum: 1
+            }
+        }
+    })
+
+db
 
 show dbs
 
@@ -427,20 +532,35 @@ var mod = {
     writeConcern : document
 }
 
-var query = {name: /PokemonInexistente/i}
-
-var mod = {$set: {active: true}}
-
-var options = {upsert: true}
-
-db.pokemons.update(query, mod, options)
-
-// $setOnInsert - inserir um documento adicional apenas se ocorrer um upsert, ou seja, se não for encontrado pela query
-
-var query = {name: /NaoExisteMon/i}
+var query = {
+    name: /PokemonInexistente/i
+}
 
 var mod = {
-    $set: {active: true},
+    $set: {
+        active: true
+    }
+}
+
+var options = {
+    upsert: true
+}
+
+db
+    .pokemons
+    .update(query, mod, options)
+
+// $setOnInsert - inserir um documento adicional apenas se ocorrer um upsert, ou
+// seja, se não for encontrado pela query
+
+var query = {
+    name: /NaoExisteMon/i
+}
+
+var mod = {
+    $set: {
+        active: true
+    },
     $setOnInsert: {
         name: 'NaoExisteMon',
         attack: null,
@@ -450,53 +570,182 @@ var mod = {
     }
 }
 
-var options = {upsert: true}
+var options = {
+    upsert: true
+}
 
-db.pokemons.update(query, mod, options)
+db
+    .pokemons
+    .update(query, mod, options)
 
 // options.multi - permite alterar vários documentos em uma só query
 
 var query = {}
 
-var mod = {$set: {active: false}}
-var options = {multi: true}
-db.pokemons.update(query, mod, options)
+var mod = {
+    $set: {
+        active: false
+    }
+}
+var options = {
+    multi: true
+}
+db
+    .pokemons
+    .update(query, mod, options)
 
-// Operadores de Array
+// Operadores de Array $in - retorna documentos que possuem algum dos calores
+// passados no array de valores { campo : {$in : [arr_valores]}}
 
-// $in - retorna documentos que possuem algum dos calores passados no array de valores
+var query = {
+    moves: {
+        $in: [/investida/]
+    }
+}
+db
+    .pokemons
+    .find(query)
 
-// { campo : {$in : [arr_valores]}}
+// $nin - retorna documentos que não possuem algum dos calores passados no array
+// de valores { campo : {$in : [arr_valores]}}
 
-var query = {moves: {$in : [/investida/]}}
-db.pokemons.find(query)
+var query = {
+    moves: {
+        $nin: [/investida/]
+    }
+}
+db
+    .pokemons
+    .find(query)
 
-// $nin - retorna documentos que não possuem algum dos calores passados no array de valores
+// $all - retorna documentos que todos os valores forem encontrados no array {
+// campo : {$all : [arr_valores]}}
 
-// { campo : {$in : [arr_valores]}}
+var query = {
+    moves: {
+        $all: ['investida', 'hidro bomba']
+    }
+}
+db
+    .pokemons
+    .find(query)
 
-var query = {moves: {$nin : [/investida/]}}
-db.pokemons.find(query)
+// Operadores de Negação $ne - not Equal {campo: {$ne : valor}}
 
-// $all - retorna documentos que todos os valores forem encontrados no array
+var query = {
+    type: {
+        $ne: 'grama'
+    }
+}
 
-// { campo : {$all : [arr_valores]}}
+// Delete - remove() remove() - apaga documento drop() - apaga coleção
 
-var query = {moves: {$all : ['investida', 'hidro bomba']}}
-db.pokemons.find(query)
+var query = {
+    "_id": ObjectId("594693e333ec76608e993f98")
+}
+db
+    .pokemons
+    .remove(query)
 
-// Operadores de Negação
+// Relacionamentos (Manual, DBRef, Mongoose (Populate))
 
-// $ne - not Equal
+var pokemons = [
+    {
+        '_id': ObjectId("5946d2d93956064e25fc4db9")
 
-// {campo: {$ne : valor}}
+    }, {
+        '_id': ObjectId("5946951133ec76608e993fb9")
+    }, {
+        '_id': ObjectId("59467d3fd35eb1fa7ba40a69")
+    }
+]
 
-var query = {type: {$ne : 'grama'}}
+var json = {
+    name: 'Meus pokemons',
+    pokemons: pokemons
+}
 
-// Delete - remove()
+db.invt.insert(json)
 
-// remove() - apaga documento
-// drop() - apaga coleção
+var pokemons = []
 
-var query = {"_id" : ObjectId("594693e333ec76608e993f98")}
-db.pokemons.remove(query)
+var getPokemon = function(id){db.pokemons.push(db.pokemons.findOne(id))}
+
+var invt = db.invt.findOne()
+
+invt.pokemons.forEach(getPokemon)
+
+// _rand() - numero aleatorio entre 0 e 1
+
+db.restaurantes.find().limit(1).skip( _rand() * db.restaurantes.count()) // select em um document aleatório da collection
+
+// .explain() - visualiza o que o mongoDb fez para rodar a query
+
+db.restaurantes.find({"name": "New Golden Restaurant"}).explain()
+
+db.restaurantes.find({"name": "New Golden Restaurant"}).explain('executionStats')
+
+db.restaurantes.find({"name": "New Golden Restaurant"}).explain('executionStats').executionStats.executionTimeMillis
+
+db.restaurantes.find({"name": "New Golden Restaurant"}).explain('executionStats').executionStats.totalDocsExamined
+
+// Index melhora a perfomance de queries
+
+db.restaurantes.getIndexes()
+
+db.system.indexes().find()
+
+db.restaurantes.createIndex({name: -1}) // cria índice para um campo da collection
+
+db.restaurantes.createIndex({name: 1, other: 1}) // cria índice composto para múltiplos campos na collection
+
+db.restaurantes.dropIndex({name: -1}) // exclui índice para um campo da collection
+
+// GridFS - Sistema de armazenamento de arquivos binários do MongoDB
+
+// limite de BSON é de 16 MB
+
+// Quando usar GridFS?
+// - Quando sistema de arquivos limita o número de arquivos em um diretório
+// - Quando quiser manter metadados e arquivos sincronizados para usar em réplicas distribuídas geograficamente
+// - Quando quiser acessar informações de partes de qrauvios grandes sem ter que carregar todos os arquvios em memória, ler seções dos arquvios em ler o arquivo inteiro na memória
+
+// Quando não usar GridFS?
+// - Quando precisar atualizar o conteúdo de todo o arquivo automaticamente. Como alternativa é melhor guardar várias versões de cada arquivo e especificar a versão atual do arquivo nos metadados
+// - Se os arquivos são menores que 16MB, salvar um JSON dentro de um único documento e usar o tipo de dados BinData para armazenar dados binários
+
+// Rodar em um terminal separado
+
+mongofiles -d be-mean-files -h 127.0.0.1 put nome-do-arquivo.mp4
+
+// Acessar no mongo o db be-mean-files
+
+use be-mean-files
+
+// o GridFS cria duas collections 'fs.chunks' e 'fs.files'
+
+// fs.chunks - os arquvios são quebrados em documentos de 255 KB contendo: { _id, files_id, n, data }
+// fs.files - metadados do arquivo armazenado contendo: { _id, length, chunkSize, uploadDate, md5, filename}
+
+// Replicas
+
+// Operações são feitas na réplica primária e replicada para os secundários
+// Os shards devem ser replicados tbm
+
+// InitialSync - clona as collections do banco de dados
+
+// oplog
+
+// SEMPRE utilizar Replica para segurança adicional dos dados
+
+mkdir /data/rs1
+mkdir /data/rs2
+mkdir /data/rs3
+
+mongod --replSet replica_set --port 27017 --dbpath /data/rs1 --logpath /data/rs1/log.txt --fork
+
+rs.initiate(rsconf)
+
+rs.status()
+rs.replicationInfo()
+rs.stepDown()
