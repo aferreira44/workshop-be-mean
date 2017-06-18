@@ -80,11 +80,76 @@ var cur = db.pokemons.find() // retorna como Cursor e não é possível utilizar
 
 while(cur.hasNext()){print(tojson(cur.Next))} // exibe conteúdo do cursor
 
+// Retrieve - db.find() e db.findOne()
 
+// _id é um identificador único UUID
+// db.collection.find({clausulas}, {campos})
 
+var query = {name: 'Pikachu'}
+var fields = {name: 1, description: 1, _id: 0}
 
+db.pokemons.find(query, fields)
 
+// Operadores Aritméticos
 
+$lt // less than
+$lte // less than or equal
 
+$gt // greater than
+$gte // greater than or equal
 
+var query = {height: {$lt: 0.5}}
 
+db.pokemons.find(query)
+
+var query = {height: {$lte: 0.5}}
+
+db.pokemons.find(query)
+
+var query = {height: {$gt: 0.5}}
+
+db.pokemons.find(query)
+
+var query = {height: {$gte: 0.5}}
+
+db.pokemons.find(query)
+
+// Operadores Lógicos
+
+$or // ou
+
+var query = { $or : [{a:1}, {b:2}]}
+
+db.collection.find(query)
+
+var query = {name: 'bob', $or : [{a:1}, {b:2}]}
+
+$nor // negação de or
+
+var query = { $nor : [{a:1}, {b:2}]}
+
+db.collection.find(query)
+
+$and // e
+
+var query = { $and : [{a:1}, {b:2}]}
+
+db.collection.find(query)
+
+var query1 = {a:1}
+
+var query2 = {b:2}
+
+var query = { $and : [query1, query2]}
+
+db.collection.find(query)
+
+// Operadores Existenciais
+
+$exists // Retorna o objeto caso o campo exista
+
+db.collection.find({campo: {$exists: true}})
+
+// Exercícios
+
+var query = {$and : [{attack : {$gte : 48}}, {height : {$lte : 0.5}}]}
